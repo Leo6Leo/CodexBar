@@ -182,6 +182,7 @@ extension UsageMenuCardView.Model {
         isRefreshing: Bool = false,
         comparisonPeriodsEnabled: Bool,
         snapshot: CostUsageTokenSnapshot?,
+        codexMonthlyBudget: CodexMonthlyBudgetStatus? = nil,
         error: String?,
         preferredCurrencyCode: String = "auto",
         calendar: Calendar = .current) -> TokenUsageSection?
@@ -258,9 +259,19 @@ extension UsageMenuCardView.Model {
         let err = (error?.isEmpty ?? true) ? nil : error
         let hints = [Self.tokenUsageHint(provider: provider), UsageFormatter.incompleteUsageNote(incompleteCount)]
             .compactMap(\.self)
+        let monthlyBudgetLine = codexMonthlyBudget.map {
+            let spent = UsageFormatter.currencyString($0.spentUSD, currencyCode: "USD")
+            let limit = UsageFormatter.currencyString($0.limitUSD, currencyCode: "USD")
+            return "\(L("This month")): \(spent) / \(limit)"
+        }
+        let monthlyBalanceLine = codexMonthlyBudget.map {
+            "\(L("Remaining balance")): \(UsageFormatter.currencyString($0.remainingUSD, currencyCode: "USD"))"
+        }
         return TokenUsageSection(
             isRefreshing: isRefreshing,
             sessionLine: sessionLine + UsageFormatter.incompleteUsageSuffix(todayIncompleteCount),
+            monthlyBudgetLine: monthlyBudgetLine,
+            monthlyBalanceLine: monthlyBalanceLine,
             monthLine: monthLine + UsageFormatter.incompleteUsageSuffix(incompleteCount),
             meteredLine: meteredLine,
             comparisonLines: comparisonPeriodsEnabled

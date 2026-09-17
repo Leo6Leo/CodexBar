@@ -351,6 +351,32 @@ struct MenuBarLayoutEditorTests {
                 balanceReadSucceeded: true,
                 creditsAvailable: true,
                 balanceIsWorkspace: true)) == "1,234")
+        let budgetNow = try #require(ISO8601DateFormatter().date(from: "2026-09-17T12:00:00Z"))
+        var budgetCalendar = Calendar(identifier: .gregorian)
+        budgetCalendar.timeZone = try #require(TimeZone(secondsFromGMT: 0))
+        let monthlyBudget = try #require(CodexMonthlyBudgetStatus(
+            limitUSD: 100,
+            tokenSnapshot: CostUsageTokenSnapshot(
+                sessionTokens: 1,
+                sessionCostUSD: 25,
+                last30DaysTokens: 1,
+                last30DaysCostUSD: 25,
+                daily: [.init(
+                    date: "2026-09-17",
+                    inputTokens: 1,
+                    outputTokens: 0,
+                    totalTokens: 1,
+                    costUSD: 25,
+                    modelsUsed: ["gpt-5"],
+                    modelBreakdowns: nil)],
+                updatedAt: budgetNow),
+            now: budgetNow,
+            calendar: budgetCalendar))
+        #expect(MenuBarLayoutBalanceResolver.balance(
+            provider: .codex,
+            snapshot: snapshot,
+            codexCredits: nil,
+            codexMonthlyBudget: monthlyBudget) == "$75.00")
         #expect(MenuBarLayoutToken.balance.editorLabel(provider: .openrouter) == L("Balance"))
     }
 

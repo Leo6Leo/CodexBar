@@ -211,6 +211,19 @@ extension SettingsStore {
         }
     }
 
+    var codexMonthlyBudgetUSD: String {
+        get { self.configSnapshot.providerConfig(for: .codex)?.codexMonthlyBudgetUSD ?? "" }
+        set {
+            self.updateProviderConfig(provider: .codex) { entry in
+                entry.codexMonthlyBudgetUSD = self.normalizedConfigValue(newValue)
+            }
+        }
+    }
+
+    var sanitizedCodexMonthlyBudgetUSD: Double? {
+        self.configSnapshot.providerConfig(for: .codex)?.sanitizedCodexMonthlyBudgetUSD
+    }
+
     var codexCookieSource: ProviderCookieSource {
         get {
             let resolved = self.resolvedCookieSource(provider: .codex, fallback: .auto)

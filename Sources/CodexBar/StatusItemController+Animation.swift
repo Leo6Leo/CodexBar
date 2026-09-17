@@ -875,6 +875,9 @@ extension StatusItemController {
     {
         let mode = self.settings.menuBarDisplayMode
         let preference = self.settings.menuBarMetricPreference(for: provider, snapshot: snapshot)
+        if let monthlyBudget = self.codexMonthlyBudgetStatus(provider: provider, now: now) {
+            return UsageFormatter.currencyString(monthlyBudget.remainingUSD, currencyCode: "USD")
+        }
         // Provider-specific by design: legacy preferences select balance text before quota and display modes.
         let usesBalance = switch provider {
         case .openrouter: preference == .automatic
@@ -1023,8 +1026,12 @@ extension StatusItemController {
     nonisolated static func menuBarLayoutAutomaticText(
         provider: UsageProvider,
         snapshot: UsageSnapshot?,
-        automatic: MenuBarLayoutRenderWindow?) -> String?
+        automatic: MenuBarLayoutRenderWindow?,
+        codexMonthlyBudget: CodexMonthlyBudgetStatus? = nil) -> String?
     {
+        if provider == .codex, let codexMonthlyBudget {
+            return UsageFormatter.currencyString(codexMonthlyBudget.remainingUSD, currencyCode: "USD")
+        }
         // Provider-specific by design: DeepInfra's real billing window has no balance detail.
         let balanceOnly = provider == .deepseek
             || (provider == .deepinfra && automatic?.resetDescription != nil && automatic?.resetsAt == nil)

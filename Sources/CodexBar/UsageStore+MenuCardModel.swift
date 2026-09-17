@@ -116,6 +116,7 @@ extension UsageStore {
             tokenCostUsageEnabled: self.settings.isCostUsageEffectivelyEnabled(for: provider),
             tokenCostIsRefreshing: !isSettings && self.tokenCostRefreshIsActive(for: provider),
             codexLocalSessionCostLedgerEnabled: self.settings.codexLocalSessionCostLedgerEnabled,
+            codexMonthlyBudgetUSD: self.settings.sanitizedCodexMonthlyBudgetUSD,
             // Settings exposes available costs regardless of the menu's display style.
             costSummaryInlineEnabled: isSettings || self.settings.costSummaryShowsInline(for: provider),
             tokenCostMenuSectionEnabled: isSettings

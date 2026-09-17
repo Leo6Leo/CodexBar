@@ -18,6 +18,7 @@ struct CodexProviderImplementation: ProviderImplementation {
         _ = settings.codexUsageDataSource
         _ = settings.codexCookieSource
         _ = settings.codexCookieHeader
+        _ = settings.codexMonthlyBudgetUSD
         _ = settings.codexExternalOAuthSourcesAllowed
     }
 
@@ -199,6 +200,19 @@ struct CodexProviderImplementation: ProviderImplementation {
     @MainActor
     func settingsFields(context: ProviderSettingsContext) -> [ProviderSettingsFieldDescriptor] {
         [
+            ProviderSettingsFieldDescriptor(
+                id: "codex-monthly-budget-usd",
+                title: "Monthly API budget (USD)",
+                subtitle: [
+                    "Optional. Enter the amount available at the start of each calendar month.",
+                    "CodexBar subtracts the Codex provider's existing local session cost estimates",
+                    "and shows the remaining balance in the menu bar.",
+                ].joined(separator: " "),
+                kind: .plain,
+                placeholder: "100.00",
+                binding: context.binding(\.codexMonthlyBudgetUSD),
+                actions: [],
+                isVisible: nil),
             ProviderSettingsFieldDescriptor(
                 id: "codex-cookie-header",
                 title: "",

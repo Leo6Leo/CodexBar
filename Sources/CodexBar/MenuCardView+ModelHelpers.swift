@@ -519,6 +519,8 @@ extension UsageMenuCardView.Model {
         case let (current?, candidate?):
             current.hintLine == candidate.hintLine &&
                 current.errorLine == candidate.errorLine &&
+                (current.monthlyBudgetLine == nil) == (candidate.monthlyBudgetLine == nil) &&
+                (current.monthlyBalanceLine == nil) == (candidate.monthlyBalanceLine == nil) &&
                 (current.meteredLine == nil) == (candidate.meteredLine == nil) &&
                 current.comparisonLines.count == candidate.comparisonLines.count
         default:

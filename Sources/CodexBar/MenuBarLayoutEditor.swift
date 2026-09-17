@@ -1012,9 +1012,17 @@ struct MenuBarLayoutPreview: View {
             .flatMap { UsagePaceText.weeklyDetail(provider: provider, pace: $0, now: now).rightLabel }
         let cost = self.store.tokenSnapshotForCurrentProviderConfig(for: provider)?.snapshot
         let costToday = MenuBarLayoutCostResolver.todayCostUSD(snapshot: cost, now: now)
+        let codexMonthlyBudget = provider == .codex
+            ? CodexMonthlyBudgetStatus(
+                limitUSD: self.settings.sanitizedCodexMonthlyBudgetUSD,
+                tokenSnapshot: cost,
+                now: now,
+                calendar: self.settings.costUsageBucketCalendar)
+            : nil
         let balanceAmounts = MenuBarLayoutBalanceResolver.balanceAmountsUSD(
             provider: provider,
-            snapshot: snapshot)
+            snapshot: snapshot,
+            codexMonthlyBudget: codexMonthlyBudget)
         let codexCredits = self.store.codexConsumerProjectionIfNeeded(
             for: provider,
             surface: .menuBar,
@@ -1047,7 +1055,8 @@ struct MenuBarLayoutPreview: View {
             automaticText: StatusItemController.menuBarLayoutAutomaticText(
                 provider: provider,
                 snapshot: snapshot,
-                automatic: automaticRenderWindow),
+                automatic: automaticRenderWindow,
+                codexMonthlyBudget: codexMonthlyBudget),
             sessionPace: self.store.menuBarLayoutPaceText(
                 provider: provider,
                 window: session,
@@ -1068,7 +1077,8 @@ struct MenuBarLayoutPreview: View {
             balance: MenuBarLayoutBalanceResolver.balance(
                 provider: provider,
                 snapshot: snapshot,
-                codexCredits: codexCredits),
+                codexCredits: codexCredits,
+                codexMonthlyBudget: codexMonthlyBudget),
             costToday: costToday.map {
                 UsageFormatter.currencyString($0, currencyCode: cost?.currencyCode ?? "USD")
             },

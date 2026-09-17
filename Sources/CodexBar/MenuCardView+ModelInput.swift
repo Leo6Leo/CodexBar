@@ -26,6 +26,7 @@ extension UsageMenuCardView.Model {
         let tokenCostUsageEnabled: Bool
         let tokenCostIsRefreshing: Bool
         let codexLocalSessionCostLedgerEnabled: Bool
+        let codexMonthlyBudgetUSD: Double?
         let costSummaryInlineEnabled: Bool
         let tokenCostMenuSectionEnabled: Bool
         let costComparisonPeriodsEnabled: Bool
@@ -75,6 +76,7 @@ extension UsageMenuCardView.Model {
             tokenCostUsageEnabled: Bool,
             tokenCostIsRefreshing: Bool = false,
             codexLocalSessionCostLedgerEnabled: Bool = false,
+            codexMonthlyBudgetUSD: Double? = nil,
             costSummaryInlineEnabled: Bool? = nil,
             tokenCostMenuSectionEnabled: Bool? = nil,
             costComparisonPeriodsEnabled: Bool = false,
@@ -121,6 +123,7 @@ extension UsageMenuCardView.Model {
             self.tokenCostUsageEnabled = tokenCostUsageEnabled
             self.tokenCostIsRefreshing = tokenCostIsRefreshing
             self.codexLocalSessionCostLedgerEnabled = codexLocalSessionCostLedgerEnabled
+            self.codexMonthlyBudgetUSD = codexMonthlyBudgetUSD
             self.costSummaryInlineEnabled = costSummaryInlineEnabled ?? tokenCostUsageEnabled
             self.tokenCostMenuSectionEnabled = tokenCostMenuSectionEnabled ?? tokenCostUsageEnabled
             self.costComparisonPeriodsEnabled = costComparisonPeriodsEnabled

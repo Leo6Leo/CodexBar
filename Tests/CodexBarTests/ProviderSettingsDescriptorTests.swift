@@ -430,6 +430,21 @@ struct ProviderSettingsDescriptorTests {
     }
 
     @Test
+    func `codex exposes monthly API budget field on its own provider`() throws {
+        let fixture = try self.makeSettingsFixture(suite: "ProviderSettingsDescriptorTests-codex-monthly-budget")
+        let context = fixture.settingsContext(provider: .codex)
+        let fields = CodexProviderImplementation().settingsFields(context: context)
+        let budget = try #require(fields.first(where: { $0.id == "codex-monthly-budget-usd" }))
+
+        budget.binding.wrappedValue = "150.00"
+
+        #expect(budget.title == "Monthly API budget (USD)")
+        #expect(fixture.settings.sanitizedCodexMonthlyBudgetUSD == 150)
+        #expect(OpenAIAPIProviderImplementation().settingsFields(context: fixture.settingsContext(provider: .openai))
+            .contains(where: { $0.id == "codex-monthly-budget-usd" }) == false)
+    }
+
+    @Test
     func `claude exposes usage and cookie pickers`() throws {
         let fixture = try self.makeSettingsFixture(suite: "ProviderSettingsDescriptorTests-claude")
         fixture.settings.debugDisableKeychainAccess = false

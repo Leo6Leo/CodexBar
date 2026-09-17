@@ -203,6 +203,11 @@ and stable account numbers distinguish rows while usable workspace labels remain
 - CLI PTY diagnostics can still parse `Credits:` from saved/manual `/status` output.
 
 ## Cost usage (local log scan)
+- **Monthly API budget (USD)** in Preferences → Providers → Codex accepts a user-defined calendar-month budget.
+  CodexBar subtracts the current month's existing Codex local session cost estimates and shows the remaining amount
+  in both the Cost card and the menu bar. This setting belongs to the Codex provider; it does not use or modify the
+  separate OpenAI provider, Codex subscription quota, extra-usage credits, or the OpenAI account billing balance.
+  The result remains an estimate from local session logs and locally cached or bundled model prices.
 - Menu source selection:
   - By default, a selected managed account keeps its own `CODEX_HOME` session history.
   - **Local session cost estimates** is a Codex-only opt-in that instead scans this Mac's ambient `$CODEX_HOME`

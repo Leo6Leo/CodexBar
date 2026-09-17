@@ -121,6 +121,8 @@ struct UsageMenuCardView: View {
         struct TokenUsageSection {
             let isRefreshing: Bool
             let sessionLine: String
+            let monthlyBudgetLine: String?
+            let monthlyBalanceLine: String?
             let monthLine: String
             let meteredLine: String?
             let comparisonLines: [String]
@@ -133,6 +135,8 @@ struct UsageMenuCardView: View {
             init(
                 isRefreshing: Bool = false,
                 sessionLine: String,
+                monthlyBudgetLine: String? = nil,
+                monthlyBalanceLine: String? = nil,
                 monthLine: String,
                 meteredLine: String? = nil,
                 comparisonLines: [String] = [],
@@ -142,6 +146,8 @@ struct UsageMenuCardView: View {
             {
                 self.isRefreshing = isRefreshing
                 self.sessionLine = sessionLine
+                self.monthlyBudgetLine = monthlyBudgetLine
+                self.monthlyBalanceLine = monthlyBalanceLine
                 self.monthLine = monthLine
                 self.meteredLine = meteredLine
                 self.comparisonLines = comparisonLines
@@ -497,6 +503,16 @@ private struct TokenUsageSectionContent: View {
             Text(self.tokenUsage.sessionLine)
                 .font(self.lineFont)
                 .lineLimit(1)
+            if let monthlyBudgetLine = self.tokenUsage.monthlyBudgetLine {
+                Text(monthlyBudgetLine)
+                    .font(self.lineFont)
+                    .lineLimit(1)
+            }
+            if let monthlyBalanceLine = self.tokenUsage.monthlyBalanceLine {
+                Text(monthlyBalanceLine)
+                    .font(self.lineFont)
+                    .lineLimit(1)
+            }
             Text(self.tokenUsage.monthLine)
                 .font(self.lineFont)
                 .lineLimit(1)
@@ -975,12 +991,20 @@ extension UsageMenuCardView.Model {
                 preferredCurrencyCode: input.preferredCurrencyCode)
         }
         let tokenUsageSnapshot = Self.tokenUsageSnapshot(input: input)
+        let codexMonthlyBudget = input.provider == .codex
+            ? CodexMonthlyBudgetStatus(
+                limitUSD: input.codexMonthlyBudgetUSD,
+                tokenSnapshot: tokenUsageSnapshot,
+                now: input.now,
+                calendar: input.costUsageBucketCalendar)
+            : nil
         let tokenUsage = Self.tokenUsageSection(
             provider: input.provider,
-            enabled: input.tokenCostMenuSectionEnabled,
+            enabled: input.tokenCostMenuSectionEnabled || codexMonthlyBudget != nil,
             isRefreshing: input.tokenCostIsRefreshing,
             comparisonPeriodsEnabled: input.costComparisonPeriodsEnabled,
             snapshot: tokenUsageSnapshot,
+            codexMonthlyBudget: codexMonthlyBudget,
             error: input.tokenError,
             preferredCurrencyCode: input.preferredCurrencyCode,
             calendar: input.costUsageBucketCalendar)

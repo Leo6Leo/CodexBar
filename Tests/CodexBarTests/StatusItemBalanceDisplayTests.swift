@@ -7,6 +7,46 @@ import Testing
 @MainActor
 struct StatusItemBalanceDisplayTests {
     @Test
+    func `Codex monthly API budget replaces quota text with remaining balance`() throws {
+        let settings = self.makeSettings(
+            suiteName: "StatusItemBalanceDisplayTests-codex-monthly-budget",
+            provider: .codex)
+        settings.codexMonthlyBudgetUSD = "100"
+        let (store, controller) = self.makeStoreAndController(settings: settings)
+        defer { controller.releaseStatusItemsForTesting() }
+        let now = try #require(ISO8601DateFormatter().date(from: "2026-09-17T12:00:00Z"))
+        store._setTokenSnapshotForTesting(CostUsageTokenSnapshot(
+            sessionTokens: 1,
+            sessionCostUSD: 25,
+            last30DaysTokens: 1,
+            last30DaysCostUSD: 25,
+            daily: [.init(
+                date: "2026-09-17",
+                inputTokens: 1,
+                outputTokens: 0,
+                totalTokens: 1,
+                costUSD: 25,
+                modelsUsed: ["gpt-5"],
+                modelBreakdowns: nil)],
+            updatedAt: now), provider: .codex)
+        let snapshot = UsageSnapshot(
+            primary: RateWindow(usedPercent: 40, windowMinutes: 300, resetsAt: nil, resetDescription: nil),
+            secondary: nil,
+            updatedAt: now)
+
+        #expect(controller.menuBarDisplayText(for: .codex, snapshot: snapshot, now: now) == "$75.00")
+        let renderData = controller.menuBarLayoutRenderData(
+            provider: .codex,
+            snapshot: snapshot,
+            warningFlash: false,
+            now: now)
+        #expect(renderData.automaticText == "$75.00")
+        #expect(renderData.balance == "$75.00")
+        #expect(renderData.metrics.balanceRemainingUSD == 75)
+        #expect(renderData.metrics.balanceUsedUSD == 25)
+    }
+
+    @Test
     func `menu bar display text uses open router balance`() {
         let settings = self.makeSettings(
             suiteName: "StatusItemBalanceDisplayTests-openrouter-balance",

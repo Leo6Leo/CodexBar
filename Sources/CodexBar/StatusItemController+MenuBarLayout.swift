@@ -110,9 +110,11 @@ extension StatusItemController {
         let runsOut = pace
             .flatMap { UsagePaceText.weeklyDetail(provider: provider, pace: $0, now: now).rightLabel }
         let costs = self.menuBarLayoutCosts(provider: provider, now: now)
+        let codexMonthlyBudget = self.codexMonthlyBudgetStatus(provider: provider, now: now)
         let balanceAmounts = MenuBarLayoutBalanceResolver.balanceAmountsUSD(
             provider: provider,
-            snapshot: snapshot)
+            snapshot: snapshot,
+            codexMonthlyBudget: codexMonthlyBudget)
         let codexCredits = self.menuBarLayoutCodexCredits(
             provider: provider,
             snapshot: snapshot,
@@ -138,7 +140,8 @@ extension StatusItemController {
             automaticText: Self.menuBarLayoutAutomaticText(
                 provider: provider,
                 snapshot: snapshot,
-                automatic: automatic),
+                automatic: automatic,
+                codexMonthlyBudget: codexMonthlyBudget),
             sessionPace: self.store.menuBarLayoutPaceText(
                 provider: provider,
                 window: windows.session,
@@ -159,7 +162,8 @@ extension StatusItemController {
             balance: MenuBarLayoutBalanceResolver.balance(
                 provider: provider,
                 snapshot: snapshot,
-                codexCredits: codexCredits),
+                codexCredits: codexCredits,
+                codexMonthlyBudget: codexMonthlyBudget),
             costToday: costs.today,
             cost30d: costs.last30Days,
             metrics: MenuBarLayoutRenderMetrics(
@@ -184,6 +188,18 @@ extension StatusItemController {
                 balanceUsedUSD: balanceAmounts.used,
                 costTodayUSD: costs.todayUSD,
                 cost30dUSD: costs.last30DaysUSD))
+    }
+
+    func codexMonthlyBudgetStatus(
+        provider: UsageProvider,
+        now: Date = Date()) -> CodexMonthlyBudgetStatus?
+    {
+        guard provider == .codex else { return nil }
+        return CodexMonthlyBudgetStatus(
+            limitUSD: self.settings.sanitizedCodexMonthlyBudgetUSD,
+            tokenSnapshot: self.store.tokenSnapshotForCurrentProviderConfig(for: .codex)?.snapshot,
+            now: now,
+            calendar: self.settings.costUsageBucketCalendar)
     }
 
     func menuBarLayoutCodexCredits(

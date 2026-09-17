@@ -569,13 +569,17 @@ enum MenuBarLayoutBalanceResolver {
     static func balance(
         provider: UsageProvider,
         snapshot: UsageSnapshot?,
-        codexCredits: CreditsSnapshot? = nil)
+        codexCredits: CreditsSnapshot? = nil,
+        codexMonthlyBudget: CodexMonthlyBudgetStatus? = nil)
         -> String?
     {
         // Provider-specific by design: Codex credits live outside UsageSnapshot, while OpenRouter exposes
         // its credit balance as the "Remaining" detail row.
         switch provider {
         case .codex:
+            if let codexMonthlyBudget {
+                return UsageFormatter.currencyString(codexMonthlyBudget.remainingUSD, currencyCode: "USD")
+            }
             guard let codexCredits, codexCredits.balanceReadSucceeded else { return nil }
             return codexCredits.remaining.rounded().formatted(
                 .number.precision(.fractionLength(0)).locale(Locale(identifier: "en_US")))
@@ -586,20 +590,24 @@ enum MenuBarLayoutBalanceResolver {
         }
     }
 
-    /// Numeric USD amounts behind OpenRouter's "Credits" detail rows. The plugin formats both rows as
-    /// `$` + `toFixed(2)` (`Sources/CodexBarCore/Resources/Plugins/openrouter.js`), so the amounts are
-    /// USD with no grouping separators; the plugin never populates `providerCost`, so there is nothing
-    /// structured to read instead.
+    /// Numeric USD amounts for balance conditionals. Codex uses its user-defined monthly budget;
+    /// OpenRouter exposes formatted "Credits" detail rows because its plugin has no structured cost snapshot.
     static func balanceAmountsUSD(
         provider: UsageProvider,
-        snapshot: UsageSnapshot?)
+        snapshot: UsageSnapshot?,
+        codexMonthlyBudget: CodexMonthlyBudgetStatus? = nil)
         -> (remaining: Double?, used: Double?)
     {
-        // Provider-specific by design: only OpenRouter reports credit amounts in its "Credits" detail rows.
-        guard provider == .openrouter else { return (nil, nil) }
-        return (
-            self.amount(snapshot?.detailRow(label: "Remaining")?.value),
-            self.amount(snapshot?.detailRow(label: "Used")?.value))
+        switch provider {
+        case .codex:
+            (codexMonthlyBudget?.remainingUSD, codexMonthlyBudget?.spentUSD)
+        case .openrouter:
+            (
+                self.amount(snapshot?.detailRow(label: "Remaining")?.value),
+                self.amount(snapshot?.detailRow(label: "Used")?.value))
+        default:
+            (nil, nil)
+        }
     }
 
     private static func amount(_ text: String?) -> Double? {
